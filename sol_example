@@ -1,0 +1,263 @@
+ 
+ 
+ 
+  // SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
+
+contract testing{
+    uint256 accounts =0;
+    address public government;
+    string secret;
+    mapping(uint256=>Peoples) people;
+    mapping(uint256=>peoplelogin) login;
+    mapping(uint256=>stafflogin) s_login;
+    mapping(string=>trackdate) available;
+ 
+    uint256 peoplecount=0;
+    uint256 vaccinecount=0;
+    uint256 staffcount=0;
+    string[] center =["center1","center2","center3"];
+    constructor(){
+        government = msg.sender;
+        secret = "qwertyuiop";
+        
+    }
+    struct trackdate{
+        
+        uint256 daycount;
+        uint256[3] dailycount;
+        // uint256[] dailycount;
+        
+        
+    }
+    
+    
+    
+    struct peoplelogin{
+        address peopleid;
+        uint256 id;
+        string passcode;
+    }
+    struct Peoples{
+       
+        uint256 id;
+        string  name;
+        string datetime;
+        uint256 bookingtime;
+        uint256 visitingtime;
+        uint256 gotvaccine;
+        bool status;
+         }
+    struct stafflogin{
+        
+        uint staffid;
+        address staff;
+        string password;
+    }
+    modifier isgovernment(){
+        require(msg.sender==government,"you are not authorized");
+        _;
+    }
+   modifier isstaff(address sender){
+       bool flag= false;
+     
+       for(uint256 i=0;i<staffcount;i++){
+           if(s_login[i].staff==sender){
+               flag=true;
+               
+             
+           }
+       }
+       if(flag==true){
+           revert("already staff with address present");
+       }
+       else{
+           
+            _;
+       }
+   
+       
+   }
+   modifier ispeople(address sender){
+         bool flag= false;
+     
+       for(uint256 i=0;i<peoplecount;i++){
+           if(login[i].peopleid==sender){
+               flag=true;
+               
+             
+           }
+       }
+       if(flag==true){
+           revert("already people with address present");
+       }
+       else{
+           
+            _;
+       }
+       
+   }
+   modifier isbooked(uint256 _id){
+    //   if(_id==1001){
+    //       revert("swf");
+    //   }
+    for(uint256 i=0;i<vaccinecount;i++){
+        if(people[i].id==_id){
+            if(people[i].gotvaccine<10){
+                   revert("id");
+                
+            }
+           
+        
+  
+     
+   }
+}
+       _;
+   }
+   
+   modifier isregistered(uint256 _id){
+     uint256  iid=_id;
+     iid=iid-1001;
+     
+       if(login[iid].id==_id){
+           _;
+       }
+       else{
+           revert("no login found");
+       }
+       
+   }
+   modifier iscenter(string memory _center){
+       bool flag =false;
+       for(uint256 i=0;i<center.length;i++){
+           if(keccak256(bytes(_center))==keccak256(bytes(center[i]))){
+               flag =true;
+               _;
+           }
+       }
+       if(flag==false)
+            revert("check your center");
+       
+   }
+    
+     function recruitstaff(address _staff,string memory _password) public isgovernment isstaff(_staff){
+        uint256 temp = staffcount;
+       
+         s_login[temp]=stafflogin(temp+101,_staff,_password);
+         staffcount++;
+         
+         
+     }
+     
+     function showstaff(uint256 id) public isgovernment  view returns(address staff,string memory password){
+         id=id-101;
+         return(s_login[id].staff,s_login[id].password);
+     }
+     function register(address _peopleid,string memory password)  public ispeople(_peopleid) {
+            uint256 temp = peoplecount;
+            login[peoplecount] = peoplelogin(_peopleid,temp+1001,password);
+            peoplecount++;
+
+     }
+     function getLogin(address _peopleid) public  view returns(uint256){
+         for(uint256 i=0;i<peoplecount;i++){
+             if(login[i].peopleid == _peopleid){
+                return login[i].id;
+             }
+         }
+             return 0;
+
+    }
+ 
+    function checklogin(uint256 _id,string memory _password) public view returns(bool)
+    {
+       _id=_id-1001;
+       string memory p =login[_id].passcode;
+       
+    return  keccak256(bytes(p)) == keccak256(bytes(_password));
+         
+         
+}
+function bookvaccine(uint256 _id,string memory _name,string memory datetime,string memory _center) public isbooked(_id) iscenter(_center) isregistered(_id){
+      
+    //  string memory _center = "center2";
+    //  uint256 index=0;
+    uint256 j=0;
+    uint256[3] memory check=available[datetime].dailycount;
+    
+    for(uint256 i=0;i<center.length;i++){
+        if(keccak256(bytes(center[i]))==keccak256(bytes(_center))){
+            if(check[i]<=50){
+              check[i]=check[i]+1;  
+              j=i;
+               
+              
+            }
+            else{
+                revert("booking full on this day try later");
+            }
+            
+        }
+    }
+    
+     available[datetime] = trackdate(available[datetime].daycount+1,check);
+     uint256 time =check[j];
+     
+    
+    people[vaccinecount]=Peoples(_id,_name,datetime,getTime(),time*10,0,false);
+    vaccinecount++;
+  
+    
+   
+   
+   
+    
+}
+function getVaccinationDetails(string memory _datetime) public view returns(string memory date,uint256 count,uint256[3] memory centercount)
+{
+                    return (_datetime,available[_datetime].daycount,available[_datetime].dailycount);
+}
+function getBookingdetails(uint256 _id) public view returns(uint256 booked,uint256 appoinment){
+    for(uint256 i=0;i<vaccinecount;i++){
+        if(people[i].id== _id){
+           return(people[i].bookingtime,people[i].visitingtime); 
+        }
+        
+    }
+    return(0,0);
+}
+function vaccineshoted(uint256  _id) public {
+    uint256 j=0;
+    for(uint256 i=0;i<vaccinecount;i++){
+       if(people[i].id==_id){
+           people[i].gotvaccine = getTime();
+           people[i].status =true;
+           j=i;
+           break;
+       }
+    }
+    
+}
+function vaccineshotedon(uint256 _id) public view returns(uint256 id,string memory name,uint256 times,uint256 gotvaccine)
+{
+    for(uint256 i=0;i<vaccinecount;i++){
+        if(people[i].id==_id){
+            return(_id,people[i].name,people[i].visitingtime,people[i].gotvaccine);
+        }
+        
+    }
+    
+  revert("no person");
+}
+function getTime () public view returns(uint256)
+{
+        return block.timestamp;
+    }
+    function getaddressindex() public returns (uint256){
+        accounts++;
+        return accounts;
+    }
+    
+
+}

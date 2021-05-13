@@ -1,3 +1,16 @@
+# For getting the contract details
+>copy code from sol_example<br>
+
+>download ganache connect to remix ide<br>
+
+>create sol file paste the copied code
+
+>deploy and you wil find the contract address at ganache transaction area<br>
+
+>copy and replace the contract address in contract.js from services
+
+>also copy the ABI from remix ide and replace in contract.js from services
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
