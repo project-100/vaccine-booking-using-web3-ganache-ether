@@ -16,6 +16,8 @@ function Home() {
   async function Submit() {
     let Api = services.API;
     let getAddress = await Api.methods.getaddressindex().call();
+    console.log(getAddress);
+    
 
     try {
       let reg = await Api.methods
@@ -31,7 +33,7 @@ function Home() {
 
   return (
     <>
-      <Nav navItems={[]} />
+      <Nav navItems={["/"]} />
       <div className='container'>
         <form className='formcontainer' onSubmit={(e) => e.preventDefault()}>
           <div className='msg'>generate your id with new password</div>

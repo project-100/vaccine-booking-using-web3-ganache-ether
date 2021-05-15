@@ -23,6 +23,13 @@ function Navbar(props) {
               {value}
             </Link>
           );
+        }
+        else if(value=="/"){
+          return(
+             <Link className='button-2' key={index} to={value}>
+              front home
+            </Link>
+          )
         } else {
           return (
             <Link className='button-2' key={index} to={'/' + value}>

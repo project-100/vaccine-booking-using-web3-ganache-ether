@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Nav from '../components/usernavbar';
 import services from '../services/contract';
+import Time from "../services/adminServices"
 
 function ShowBookings() {
   const [booking, setBooking] = useState({
@@ -11,29 +12,14 @@ function ShowBookings() {
   const [account, setAccounts] = useState([]);
   useEffect(async () => {
     let Api = services.API;
+    let id = await  localStorage.getItem("vaccine_login");
     let res = await Api.methods.getBookingdetails(1001).call();
     console.log(res);
     let time = new Date(res.booked * 1000);
 
     time = time.toDateString();
-    let timing;
-    let starttime = 9;
-    if (res.appoinment < 60) {
-      timing = '9:' + res.appoinment;
-    } else {
-      let temp1 = res.appoinment;
-      let count = 0;
-      while (true) {
-        if (temp1 > 60) {
-          temp1 = temp1 - 60;
-          count++;
-        } else {
-          break;
-        }
-      }
-      starttime = starttime + count;
-      timing = starttime + ':' + temp1;
-    }
+    let timing =Time.calculateTime(res.appoinment);
+    
     let temp = {
       booked: time,
       appoinment: timing,
@@ -47,7 +33,7 @@ function ShowBookings() {
     let num = Number(services.getLocal());
     let cancel = await Api.methods
       .cancelvaccine(num)
-      .send({ from: account[num - 1001 + 10], gas: 200000 });
+      .send({ from: account[num - 1000 + 10], gas: 200000 });
     window.location.href = window.location.href;
   }
 

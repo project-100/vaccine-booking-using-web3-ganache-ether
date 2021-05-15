@@ -54,7 +54,14 @@
   background-color: #fb8122;
   flex-direction: column;
 }
+.panel{
+  text-align: left;
+  max-width: 98%;
+  padding: 1%;
+  height: 30%;
 
+  flex-direction: column;
+}
 .formcontainer {
   width: 40%;
   height: auto;
@@ -63,3 +70,5 @@
   margin-top: 10%;
   border-radius: 5%;
 }
+
+

@@ -18,7 +18,7 @@ function Login() {
     let islogin = await Api.methods.checklogin(Id, pass).call();
     console.log(islogin);
     if (islogin) {
-      let num = Id - 1001 + 10;
+      let num = Id - 1000 + 10;
       localStorage.setItem('vaccine_login', Id);
 
       window.location.href += `home/` + accounts[num] + '/' + Id;
@@ -27,7 +27,7 @@ function Login() {
 
   return (
     <>
-      <Nav navItems={[]} />
+      <Nav navItems={["register","adminlogin"]} />
       <div className='container'>
         <form className='formcontainer' onSubmit={(e) => e.preventDefault()}>
           <div className='msg'>LOGIN</div>
