@@ -1,166 +1,321 @@
-import { useEffect, useState } from "react";
-import AdminService  from "../services/adminServices"
-import services from "../services/contract"
+import { useEffect, useState } from 'react';
+import AdminService from '../services/adminServices';
+import services from '../services/contract';
+import { Link } from 'react-router-dom';
 
-function Admin(){
-    const[staffcount,setstaffcount] = useState(0);
-    const[bookings,setBookings] = useState([]);
-    const[Id,setId] =useState(0);
-    const[staffpass,setPass]=useState("");
-    const[staffdetail,setStaff]=useState(null);
+function Admin() {
+  const [staffcount, setstaffcount] = useState(0);
+  const [bookings, setBookings] = useState([]);
+  const [Id, setId] = useState(0);
+  const [staffpass, setPass] = useState('');
+  const [staffdetail, setStaff] = useState(null);
+  const [loading, isLoading] = useState(false);
 
-    const bookingheader=["id","bookingtime","name","status","gotvaccine","visitingtime"];
-    let initialstate={
-        showbookings:false
+  const bookingheader = [
+    'id',
+    'bookingtime',
+    'name',
+    'status',
+    'gotvaccine',
+    'visitingtime',
+    'center',
+  ];
+  let initialstate = {
+    showbookings: false,
+  };
+  const [government, isgovernment] = useState(false);
+  const [display, setdisplay] = useState(initialstate);
+
+  useEffect(async () => {
+    console.log('use efect');
+    let id = localStorage.getItem('staff');
+
+    if (id === '100') {
+      console.log(id + 'sssssssss');
+      isgovernment(true);
     }
-    const [display,setdisplay] = useState(initialstate)
-
-useEffect(async ()=>{
-   
-  
-    await AdminService.getStaff();
-   
-
-},[])
- async function show(e){
-     let newstate = initialstate;
-     newstate[e.target.name]=true;
-     if(e.target.value=="all"){
-          let newData =await AdminService.Getbookings();
-          setBookings(newData);
-
-     }
-     console.log(newstate);
-   
-     setdisplay(newstate);
-
-        
+    // await AdminService.getStaff();
+  }, []);
+  async function show(e) {
+    if (loading == true) {
+      alert('loading please wait for previous request');
+      return;
     }
-    async function showId(e){   
-        let data = await AdminService.GetUserBookings(Id);
-        console.log(data+Id);
-        if(data)
-          setBookings(data);
-
-        show(e);
+    isLoading(true);
+    let newstate = initialstate;
+    newstate[e.target.name] = true;
+    if (e.target.value == 'all') {
+      let newData = await AdminService.Getbookings();
+      setBookings(newData);
     }
-function convertdate(d){
+    console.log(newstate);
+
+    setdisplay(newstate);
+
+    isLoading(false);
+  }
+  async function showId(e) {
+    if (loading == true) {
+      alert('loading please wait for previous request');
+      return;
+    }
+    isLoading(true);
+    let data = await AdminService.GetUserBookings(Id);
+    console.log(data + Id);
+    if (data) setBookings(data);
+
+    show(e);
+    isLoading(false);
+  }
+
+  function convertdate(d) {
+    if (d == 0) {
+      return 'not yet vaccinated';
+    } else if (d == 1) {
+      return 'cancelled';
+    }
     let time = new Date(d * 1000);
 
     time = time.toDateString();
     return time;
-}
-async function updateVaccine(e){
-    let Api = services.API;
-    try{
-        let ss=await Api.methods.vaccineshoted(Id).send({from:services.Government,gas:200000});
-        console.log(ss);
-        window.location.href=window.location.href;
+  }
+  async function updateVaccine(e) {
+    if (loading == true) {
+      alert('loading please wait for previous request');
+      return;
     }
-    catch(e){
-        console.log(e);
+    isLoading(true);
+    let Api = services.API;
+    try {
+      let account = await services.getAccount();
+
+      let ss = await Api.methods.vaccineshoted(Id).send({
+        from: account[localStorage.getItem('staff') - 100],
+        gas: 200000,
+      });
+      let newData = await AdminService.Getbookings();
+      setBookings(newData);
+      setdisplay(initialstate);
+      isLoading(false);
+    } catch (e) {
+      console.log(e);
+      isLoading(false);
+    }
+  }
+  async function showstaff(id = 0) {
+    if (loading == true) {
+      alert('loading please wait for previous request');
+      return;
     }
 
-}
-async function showstaff(){
-    let Api=services.API;
-    try{
-       let check= await Api.methods.showstaff(Id).call();
-       console.log("called1")
+    isLoading(true);
+
+    let Api = services.API;
+    try {
+      let new_id = Id;
+      if (id > 0) {
+        new_id = id;
+      }
+      let check = await Api.methods.showstaff(new_id).call();
+      console.log('called1');
       setStaff(check);
-      await AdminService.getStaff();
+
+      // await AdminService.getStaff();
+      setdisplay(initialstate);
+      isLoading(false);
+    } catch (e) {
+      console.log(e);
+      isLoading(false);
     }
-    catch(e){
-        console.log(e);
+  }
+  async function addStaff() {
+    if (loading == true) {
+      alert('loading please wait for previous request');
+      return;
     }
-}
-async function addStaff(){
-    let Api=services.API;
-    let account =await services.getAccount();
-  
+    isLoading(true);
+    let Api = services.API;
+    let account = await services.getAccount();
+
     console.log(account);
     let staffcount = await AdminService.getstaffcount();
-    try{
-        let check = await Api.methods.recruitstaff(account[staffcount+1],staffpass).send({from:account[0],gas:200000});
-        console.log(check);
-        alert("id is" +(staffcount+101));
+    try {
+      let check = await Api.methods
+        .recruitstaff(account[staffcount + 1], staffpass)
+        .send({ from: account[0], gas: 200000 });
+      console.log(check);
+      alert('new staff id is' + (staffcount + 101));
+
+      isLoading(false);
+      showstaff(staffcount + 101);
+    } catch (e) {
+      console.log(e);
+      alert('error adding staff now try later');
     }
-    catch(e){
-        console.log(e);
-    }
+  }
 
-}
-
-
-    return(
-        <>
-       <div className="container">
-           <div className="panel">
-               <table>
-                   <tr>
-            <td key="1a">  <button name="showbookings" value="all" onClick={show} >Get bookings</button></td> 
-             <td key="1b"> <span > <form onSubmit={(e)=>e.preventDefault()}> <input type="number" min="1001" onChange={(e)=>setId(e.target.value)} />
-             <br />
-              <input type="submit" name="showbookings" value={"show"} onClick={showId} />
-              <input type="submit" value="vaccine shoted" onClick={updateVaccine} />
-              </form></span></td>
-              <td key="1d">
-                       <form onSubmit={(e)=>{e.preventDefault();e.target.reset()}}>
-                           <input type="text" onChange={(e)=>setPass(e.target.value)} />
-                           <input type="submit" value="addstaff" onClick={addStaff} />
-                       </form>
-              </td>
-              <td key="1c">
-                  <form onSubmit={(e)=>e.preventDefault()} >
-                      <input type="number" onChange={(e)=>setId(e.target.value)} />
-                      <input type="submit" name="showstaff" value="showstaff" onClick={showstaff} />
+  return (
+    <>
+      <div
+        className='container'
+        style={{ backgroundImage: 'unset', backgroundColor: '#1d2228' }}
+      >
+        <div className='panel'>
+          <table className='table-class'>
+            <tr className='tr-class'>
+              <td className='td-class' key='1b'>
+                {' '}
+                <span>
+                  {' '}
+                  <form onSubmit={(e) => e.preventDefault()}>
+                    {' '}
+                    <input
+                      type='number'
+                      className={'input-box'} 
+                     
+                      placeholder='enter Id'
+                      min='1001'
+                      onChange={(e) => setId(e.target.value)}
+                    />
+                    <br />
+                    <input
+                      type='submit'
+                      className='button-2 '
+                      name='showbookings'
+                      value={'show'}
+                      onClick={showId}
+                    />
+                    <input
+                      type='submit'
+                      className='button-2 '
+                      value='vaccine shoted'
+                      onClick={updateVaccine}
+                    />
                   </form>
-
+                </span>
               </td>
-              </tr>
-              </table>
-           </div>
+              {government && (
+                <>
+                  {' '}
+                  <td class='td-class' key='1d'>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        e.target.reset();
+                      }}
+                    >
+                      <input
+                        type='password'
+                        placeholder='enter password for new staff'
+                        className='input-box width-50'
+                        onChange={(e) => setPass(e.target.value)}
+                      />
+                      <br />
+                      <input
+                        type='submit'
+                        className='button-2 width-50'
+                        value='addstaff'
+                        onClick={addStaff}
+                      />
+                      <br></br>
+                    </form>
+                  </td>
+                  <td class='td-class' key='1c'>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                      <input
+                        type='number'
+                        placeholder='enter staff Id'
+                        className='input-box'
+                        onChange={(e) => setId(e.target.value)}
+                      />
+                      <input
+                        type='submit'
+                        className='button-2 width-50'
+                        name='showstaff'
+                        value='showstaff'
+                        onClick={showstaff}
+                      />
+                    </form>
+                  </td>
+                  <td class='td-class' key='1a'>
+                    <button
+                      name='showbookings'
+                      className='button-2 width-50'
+                      value='all'
+                      onClick={show}
+                    >
+                      show bookings
+                    </button>
+                  </td>{' '}
+                </>
+              )}
+              <td>
+                <Link
+                  to='/logout'
+                  className='button-2'
+                  style={{
+                    width: '100%',
+                    padding: '5%',
+                    backgroundColor: 'wheat',
+                  }}
+                  onClick={() => localStorage.removeItem('staff')}
+                >
+                  LogOut
+                </Link>
+              </td>
+            </tr>
+          </table>
+        </div>
 
-             
-          
+        <table className='table-class'>
+          <tr class='tr-class'>
+            {display.showbookings &&
+              bookingheader.map((value, index) => {
+                return (
+                  <th class='th-class' key={index}>
+                    {value}
+                  </th>
+                );
+              })}
+          </tr>
 
-       </div>
-       <table>
-  <tr>
-    {display.showbookings && bookingheader.map((value,index)=>{
-        return(
-            <th key={index}>{value}</th>
-        )
-    })}
-  </tr>
-      
-       {display.showbookings && bookings.map((value,index)=>{
-           return(
-               <tr key={index+"row"} >
-                   <td>{value.id}</td>
-                     <td>{convertdate(value.bookingtime)}</td>
-                     <td>{value.name}</td>
-                     <td>{value.status?"true":"false"}</td>
-                     <td>{convertdate(value.gotvaccine)}</td>
-                     <td>{AdminService.calculateTime(value.visitingtime)}</td>
-
-               </tr>
-           )
-       })}
-       
-       
+          {display.showbookings &&
+            !loading &&
+            bookings.map((value, index) => {
+              return (
+                <tr class='tr-class' key={index + 'row'}>
+                  <td class='td-class'>{value.id}</td>
+                  <td class='td-class'>{convertdate(value.bookingtime)}</td>
+                  <td class='td-class'>{value.name}</td>
+                  <td class='td-class'>{value.status ? 'true' : 'false'}</td>
+                  <td class='td-class'>{convertdate(value.gotvaccine)}</td>
+                  <td class='td-class'>
+                    {AdminService.calculateTime(value.visitingtime)}
+                  </td>
+                  <td class='td-class'>{value.centername}</td>
+                </tr>
+              );
+            })}
         </table>
-       {staffdetail!=null && <table>
-            <tr>
-           <th>staffaddress</th>
-           <th>staffname</th>
-       </tr>
-       <tr>
-         <td>{staffdetail.staff}</td>
-         <td>{staffdetail.password}</td>
-       </tr>
-        </table>}
-        </>
-    )
+        {staffdetail != null && !loading && (
+          <table className='table-class' onDoubleClick={() => setStaff(null)}>
+            <tr class='tr-class'>
+              <th class='th-class'>staffaddress</th>
+              <th class='th-class'>staffname</th>
+            </tr>
+            <tr class='tr-class'>
+              <td class='td-class'>{staffdetail.staff}</td>
+              <td class='td-class'>{staffdetail.password}</td>
+            </tr>
+          </table>
+        )}
+        {loading && (
+          <div>
+            <div class='loader' style={{ marginLeft: '45%' }}></div>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 export default Admin;

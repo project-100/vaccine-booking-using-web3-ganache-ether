@@ -42,21 +42,30 @@ function UserHome({ match }) {
   async function Submit(e) {
     // e.target.reset;
     let Api = services.API;
-    let book = await Api.methods
-      .bookvaccine(
-        Number(services.getLocal()),
-        detail.name,
-        detail.date,
-        detail.center
-      )
-      .send({ from: match.params.address, gas: 300000 });
-    console.log(book);
+    try {
+      let book = await Api.methods
+        .bookvaccine(
+          Number(services.getLocal()),
+          detail.name,
+          detail.date,
+          detail.center
+        )
+        .send({ from: match.params.address, gas: 300000 });
+      window.location.href = 'http://localhost:3000/bookings';
+    } catch (e) {
+      alert(
+        'booking not allowed,make sure  you dont have any bookings on booking section,else contact helpline'
+      );
+    }
   }
 
   return (
     <>
       <Nav navItems={['bookings', 'logout']} match={match} />
-      <div className='container' style={{ backgroundColor: '#E1E2E2' }}>
+      <div
+        className='container background-1'
+        style={{ backgroundColor: '#E1E2E2' }}
+      >
         <form
           className='formcontainer'
           style={{ backgroundColor: '#1D2228' }}
@@ -69,18 +78,22 @@ function UserHome({ match }) {
             type='text'
             name='name'
             placeholder='your name'
-            className='input-box margin-10'
+            className='input-box margin-10 box-shadow-1'
             onChange={handlechange}
           />
           <input
             type='date'
-            className='input-box'
+            className='input-box box-shadow-1'
             name='date'
             min={minDate}
             onChange={handlechange}
           />
 
-          <select className='input-box' name='center' onChange={handlechange}>
+          <select
+            className='input-box box-shadow-1'
+            name='center'
+            onChange={handlechange}
+          >
             <option value='center1'>center1</option>
             <option value='center2'>center2</option>
             <option value='center3'>center3</option>

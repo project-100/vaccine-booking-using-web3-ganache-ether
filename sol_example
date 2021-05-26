@@ -1,21 +1,20 @@
  
  
- 
   // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
 contract testing{
-    uint256 accounts =0;
+    uint256 public accounts =11;
     address public government;
-    string secret;
-    mapping(uint256=>Peoples) people;
-    mapping(uint256=>peoplelogin) login;
-    mapping(uint256=>stafflogin) s_login;
-    mapping(string=>trackdate) available;
+    string public secret;
+    mapping(uint256=>Peoples) public  people;
+    mapping(uint256=>peoplelogin) public login;
+    mapping(uint256=>stafflogin) public s_login;
+    mapping(string=>trackdate) public available;
  
     uint256 peoplecount=0;
     uint256 vaccinecount=0;
-    uint256 staffcount=0;
+    uint256  staffcount=0;
     string[] center =["center1","center2","center3"];
     constructor(){
         government = msg.sender;
@@ -46,6 +45,7 @@ contract testing{
         uint256 bookingtime;
         uint256 visitingtime;
         uint256 gotvaccine;
+        string centername;
         bool status;
          }
     struct stafflogin{
@@ -103,10 +103,14 @@ contract testing{
     //   }
     for(uint256 i=0;i<vaccinecount;i++){
         if(people[i].id==_id){
-            if(people[i].gotvaccine<10){
+            if(people[i].gotvaccine==0){
                    revert("id");
                 
             }
+            // else if(people[i].gotvaccine<10){
+            //     _;
+            // }
+         
            
         
   
@@ -149,6 +153,10 @@ contract testing{
          
          
      }
+     function staff_check(uint256 _id,string memory _password) public view returns(bool){
+         _id=_id-101;
+         return keccak256(bytes(s_login[_id].password))==keccak256(bytes(_password));
+     }
      
      function showstaff(uint256 id) public isgovernment  view returns(address staff,string memory password){
          id=id-101;
@@ -158,6 +166,7 @@ contract testing{
             uint256 temp = peoplecount;
             login[peoplecount] = peoplelogin(_peopleid,temp+1001,password);
             peoplecount++;
+            accounts++;
 
      }
      function getLogin(address _peopleid) public  view returns(uint256){
@@ -205,7 +214,7 @@ function bookvaccine(uint256 _id,string memory _name,string memory datetime,stri
      uint256 time =check[j];
      
     
-    people[vaccinecount]=Peoples(_id,_name,datetime,getTime(),time*10,0,false);
+    people[vaccinecount]=Peoples(_id,_name,datetime,getTime(),time*10,0,_center,false);
     vaccinecount++;
   
     
@@ -218,23 +227,30 @@ function getVaccinationDetails(string memory _datetime) public view returns(stri
 {
                     return (_datetime,available[_datetime].daycount,available[_datetime].dailycount);
 }
-function getBookingdetails(uint256 _id) public view returns(uint256 booked,uint256 appoinment){
+function getBookingdetails(uint256 _id) public view returns(uint256 booked,uint256 appoinment,string memory datetime){
     for(uint256 i=0;i<vaccinecount;i++){
         if(people[i].id== _id){
-           return(people[i].bookingtime,people[i].visitingtime); 
+            if(people[i].gotvaccine==0){
+                 return(people[i].bookingtime,people[i].visitingtime,people[i].datetime); 
+            }
+          
         }
         
     }
-    return(0,0);
+    return(0,0,"0");
 }
 function vaccineshoted(uint256  _id) public {
     uint256 j=0;
     for(uint256 i=0;i<vaccinecount;i++){
        if(people[i].id==_id){
-           people[i].gotvaccine = getTime();
+            if(people[i].gotvaccine==0){
+                 people[i].gotvaccine = getTime();
            people[i].status =true;
            j=i;
            break;
+                
+            }
+           
        }
     }
     
@@ -243,6 +259,7 @@ function vaccineshotedon(uint256 _id) public view returns(uint256 id,string memo
 {
     for(uint256 i=0;i<vaccinecount;i++){
         if(people[i].id==_id){
+            if(people[i].gotvaccine>10)
             return(_id,people[i].name,people[i].visitingtime,people[i].gotvaccine);
         }
         
@@ -254,10 +271,30 @@ function getTime () public view returns(uint256)
 {
         return block.timestamp;
     }
-    function getaddressindex() public returns (uint256){
-        accounts++;
+
+    function getaddressindex() public view returns (uint256){
+   
         return accounts;
     }
+    
+function cancelvaccine(uint256 _id) public {
+     for(uint256 i=0;i<vaccinecount;i++){
+       if(people[i].id==_id){
+             if(people[i].gotvaccine==0){
+                       people[i].gotvaccine = 1;
+           people[i].status =false;
+            break;
+             }
+     
+          
+          
+       }
+    }
+    
+}
+
+
+
     
 
 }

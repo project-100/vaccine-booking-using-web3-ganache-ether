@@ -22,13 +22,15 @@ function Login() {
       localStorage.setItem('vaccine_login', Id);
 
       window.location.href += `home/` + accounts[num] + '/' + Id;
+    } else {
+      alert('your crendentials not  valid');
     }
   }
 
   return (
     <>
-      <Nav navItems={["register","adminlogin"]} />
-      <div className='container'>
+      <Nav navItems={['register', 'adminlogin']} />
+      <div className='container-1'>
         <form className='formcontainer' onSubmit={(e) => e.preventDefault()}>
           <div className='msg'>LOGIN</div>
           <input
