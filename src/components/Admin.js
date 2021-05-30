@@ -10,6 +10,7 @@ function Admin() {
   const [staffpass, setPass] = useState('');
   const [staffdetail, setStaff] = useState(null);
   const [loading, isLoading] = useState(false);
+  const[filter,setFilter ]= useState(false);
 
   const bookingheader = [
     'id',
@@ -34,6 +35,9 @@ function Admin() {
       console.log(id + 'sssssssss');
       isgovernment(true);
     }
+   else if(id==null){
+     window.location.href ='http://localhost:3000/';
+   }
     // await AdminService.getStaff();
   }, []);
   async function show(e) {
@@ -153,6 +157,9 @@ function Admin() {
       alert('error adding staff now try later');
     }
   }
+  function applyFilter(){
+    setFilter(!filter);
+  }
 
   return (
     <>
@@ -191,6 +198,14 @@ function Admin() {
                       value='vaccine shoted'
                       onClick={updateVaccine}
                     />
+                     <button
+                      name='showbookings'
+                      className='button-2 width-50'
+                      value='all'
+                      onClick={applyFilter}
+                    >
+                      {filter?"remove filter":"apply filter"}
+                    </button>
                   </form>
                 </span>
               </td>
@@ -246,6 +261,7 @@ function Admin() {
                     >
                       show bookings
                     </button>
+                     
                   </td>{' '}
                 </>
               )}
@@ -282,8 +298,14 @@ function Admin() {
           {display.showbookings &&
             !loading &&
             bookings.map((value, index) => {
+            ;
+              if(filter==true && value.gotvaccine !=0){
+               
+                             return;
+
+              }
               return (
-                <tr class='tr-class' key={index + 'row'}>
+                    <tr class='tr-class' key={index + 'row'}>
                   <td class='td-class'>{value.id}</td>
                   <td class='td-class'>{convertdate(value.bookingtime)}</td>
                   <td class='td-class'>{value.name}</td>
