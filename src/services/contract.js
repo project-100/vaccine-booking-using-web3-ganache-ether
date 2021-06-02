@@ -1,9 +1,9 @@
 import React from 'react';
 import web3 from 'web3';
 import ABI from "./ABI"
-const contractaddress = '0xc41eD1D2351A5A91e0cb17d0DD9CB8977E55308c';
+const contractaddress = '0x7cF7e47F7DFa1aeF32e83cDe34d036D975d5B4f2';
 
-const Government = '0x2c3b0e471c7E6C08ef8A30B69D9179A25b12BF11';
+const Government = '0x0C6004fE657fEBf22850AdbA02C7C59D05d2a6fE';
 
 let Accounts;
 let Web3 = new web3('http://localhost:7545');

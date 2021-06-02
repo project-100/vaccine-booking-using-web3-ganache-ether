@@ -6,6 +6,7 @@ import Nav from '../components/usernavbar';
 function Home() {
   const [pass, setpass] = useState('');
   const [Accounts, setAccounts] = useState([]);
+  const [ispass,setispass] =useState(false);
   const [id, setId] = useState('');
 
   useEffect(async () => {
@@ -15,6 +16,10 @@ function Home() {
   }, []);
   async function Submit() {
     let Api = services.API;
+    if(pass===""){
+      alert("password should not empty")
+     return;
+    }
     let getAddress = await Api.methods.getaddressindex().call();
     console.log(getAddress);
     
@@ -46,11 +51,26 @@ function Home() {
               setpass(e.target.value);
             }}
           />
+            <input
+            type='password'
+            placeholder='ConfirmPASSWORD'
+            className='input-box margin-10'
+            onChange={(e) => {
+              if(pass=== e.target.value){
+                  setispass(true)
+              }
+              else{
+                setispass(false)
+              }
+              
+            }}
+          />
           <br />
           <input
             type='submit'
             value='register'
             className='button-1'
+            disabled={!ispass}
             onClick={Submit}
           />
           <h1>your id is:{id}</h1>
