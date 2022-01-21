@@ -10,7 +10,7 @@ function Admin() {
   const [staffpass, setPass] = useState('');
   const [staffdetail, setStaff] = useState(null);
   const [loading, isLoading] = useState(false);
-  const[filter,setFilter ]= useState(false);
+  const [filter, setFilter] = useState(false);
 
   const bookingheader = [
     'id',
@@ -34,10 +34,9 @@ function Admin() {
     if (id === '100') {
       console.log(id + 'sssssssss');
       isgovernment(true);
+    } else if (id == null) {
+      window.location.href = 'http://localhost:3000/';
     }
-   else if(id==null){
-     window.location.href ='http://localhost:3000/';
-   }
     // await AdminService.getStaff();
   }, []);
   async function show(e) {
@@ -139,11 +138,15 @@ function Admin() {
     }
     isLoading(true);
     let Api = services.API;
+    console.log('staff');
+    await AdminService.getStaff();
+
     let account = await services.getAccount();
 
     console.log(account);
     let staffcount = await AdminService.getstaffcount();
     try {
+      console.log(staffcount);
       let check = await Api.methods
         .recruitstaff(account[staffcount + 1], staffpass)
         .send({ from: account[0], gas: 200000 });
@@ -154,10 +157,11 @@ function Admin() {
       showstaff(staffcount + 101);
     } catch (e) {
       console.log(e);
+      isLoading(false);
       alert('error adding staff now try later');
     }
   }
-  function applyFilter(){
+  function applyFilter() {
     setFilter(!filter);
   }
 
@@ -178,8 +182,7 @@ function Admin() {
                     {' '}
                     <input
                       type='number'
-                      className={'input-box'} 
-                     
+                      className={'input-box'}
                       placeholder='enter Id'
                       min='1001'
                       onChange={(e) => setId(e.target.value)}
@@ -198,13 +201,13 @@ function Admin() {
                       value='vaccine shoted'
                       onClick={updateVaccine}
                     />
-                     <button
+                    <button
                       name='showbookings'
                       className='button-2 width-50'
                       value='all'
                       onClick={applyFilter}
                     >
-                      {filter?"remove filter":"apply filter"}
+                      {filter ? 'remove filter' : 'apply filter'}
                     </button>
                   </form>
                 </span>
@@ -261,7 +264,6 @@ function Admin() {
                     >
                       show bookings
                     </button>
-                     
                   </td>{' '}
                 </>
               )}
@@ -298,14 +300,11 @@ function Admin() {
           {display.showbookings &&
             !loading &&
             bookings.map((value, index) => {
-            ;
-              if(filter==true && value.gotvaccine !=0){
-               
-                             return;
-
+              if (filter == true && value.gotvaccine != 0) {
+                return;
               }
               return (
-                    <tr class='tr-class' key={index + 'row'}>
+                <tr class='tr-class' key={index + 'row'}>
                   <td class='td-class'>{value.id}</td>
                   <td class='td-class'>{convertdate(value.bookingtime)}</td>
                   <td class='td-class'>{value.name}</td>
@@ -322,10 +321,12 @@ function Admin() {
         {staffdetail != null && !loading && (
           <table className='table-class' onDoubleClick={() => setStaff(null)}>
             <tr class='tr-class'>
+             < th class='th-class'>staffId</th>
               <th class='th-class'>staffaddress</th>
-              <th class='th-class'>staffname</th>
+              <th class='th-class'>staffpass</th>
             </tr>
             <tr class='tr-class'>
+              <td class='td-class'>{Id}</td>
               <td class='td-class'>{staffdetail.staff}</td>
               <td class='td-class'>{staffdetail.password}</td>
             </tr>

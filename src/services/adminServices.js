@@ -60,10 +60,11 @@ async function getStaff() {
   let count = 0;
   while (true) {
     let data = await Api.methods.s_login(count).call();
-    if (data.staffid === 0) {
+    if (data.staffid == 0) {
       break;
     }
     staffData.push(data);
+    console.log(data.staffid);
     count++;
   }
   return staffData;

@@ -30,6 +30,7 @@ function Home() {
         .send({ from: Accounts[getAddress], gas: 1000000 });
       let userid = await Api.methods.getLogin(Accounts[getAddress]).call();
       setId(userid);
+      setpass("");
     } catch (e) {
       let error = String(e);
       console.log(error.split(':'));
@@ -46,26 +47,33 @@ function Home() {
           <input
             type='password'
             placeholder='PASSWORD'
+            value={pass}
             className='input-box margin-10'
             onChange={(e) => {
               setpass(e.target.value);
+              setispass(false)
             }}
           />
-            <input
+           {!ispass && <input
             type='password'
             placeholder='ConfirmPASSWORD'
             className='input-box margin-10'
+            
             onChange={(e) => {
-              if(pass=== e.target.value){
+              if(pass=== e.target.value ){
+                console.log(e.target.value);
                   setispass(true)
+
               }
               else{
                 setispass(false)
               }
               
+              
             }}
-          />
+          />}
           <br />
+          {!ispass && <p style={{color:"red"}}>Password not same</p>}
           <input
             type='submit'
             value='register'
